@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>THỜI BÁO VIỆT | Nhật Báo Điện Tử Việt Nam 24/7</title>
+    <meta name="description" content="Thời Báo Việt - Cổng thông tin nhật báo điện tử tiếng Việt cập nhật 24/7 từ cổng NewsData.io. Tin tức thời sự, kinh doanh, công nghệ AI, thể thao và đời sống." />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23991b1b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2'/><path d='M18 14h-8'/><path d='M15 18h-5'/><path d='M10 6h8v4h-8V6Z'/></svg>" />
+
+    <!-- Google Fonts & Custom CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              paper: {
+                light: '#fbfaf8',
+                sepia: '#f5efe3',
+                dark: '#121418',
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="min-h-screen flex flex-col font-body selection:bg-amber-200 selection:text-amber-950">
+
+    <!-- 1. TOP BAR -->
+    <div class="border-b border-stone-200 bg-stone-100 text-stone-700 text-xs py-1.5 px-4 transition-colors">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <!-- Date, Lunar & Weather -->
+        <div class="flex items-center gap-3 font-medium">
+          <span id="current-date-display" class="font-semibold text-stone-900">Thứ Hai, ngày 10 tháng 11 năm 2026</span>
+          <span class="hidden md:inline text-stone-400">|</span>
+          <span id="lunar-date-display" class="hidden md:inline text-stone-600 italic">Âm lịch: Ngày 2 tháng 10 năm Bính Ngọ</span>
+          <span class="hidden lg:inline text-stone-400">|</span>
+          <div id="weather-preview-row" class="hidden lg:flex items-center gap-3"></div>
+        </div>
+
+        <!-- Controls: Market Ticker & Reading Preferences -->
+        <div class="flex items-center gap-3">
+          <div id="market-preview-row" class="hidden xl:flex items-center gap-3 border-r border-stone-300 pr-3"></div>
+
+          <!-- Theme switcher -->
+          <div class="flex items-center gap-1 bg-stone-200/80 rounded-md p-0.5">
+            <button onclick="applyTheme('light')" data-theme-btn="light" title="Chế độ Sáng" class="px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 transition-all">
+              <i data-lucide="sun" class="w-3 h-3"></i>
+              <span class="hidden sm:inline">Sáng</span>
+            </button>
+            <button onclick="applyTheme('sepia')" data-theme-btn="sepia" title="Chế độ Giấy Báo Cổ Điển" class="px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 transition-all">
+              <i data-lucide="book-open" class="w-3 h-3"></i>
+              <span class="hidden sm:inline">Giấy Báo</span>
+            </button>
+            <button onclick="applyTheme('dark')" data-theme-btn="dark" title="Chế độ Tối" class="px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 transition-all">
+              <i data-lucide="moon" class="w-3 h-3"></i>
+              <span class="hidden sm:inline">Tối</span>
+            </button>
+          </div>
+
+          <!-- Font Size Adjuster -->
+          <div class="hidden sm:flex items-center gap-0.5 bg-stone-200/80 rounded-md p-0.5 text-[11px]">
+            <button onclick="applyFontSize('normal')" data-font-btn="normal" class="px-1.5 py-0.5 rounded" title="Cỡ chữ chuẩn">A</button>
+            <button onclick="applyFontSize('large')" data-font-btn="large" class="px-1.5 py-0.5 rounded" title="Cỡ chữ to">A+</button>
+            <button onclick="applyFontSize('huge')" data-font-btn="huge" class="px-1.5 py-0.5 rounded" title="Cỡ chữ rất to">A++</button>
+          </div>
+
+          <!-- API Key Config Button -->
+          <button onclick="openApiKeyModal()" class="flex items-center gap-1 px-2 py-0.5 rounded border border-stone-300 hover:bg-stone-200 text-stone-700 transition-colors text-[11px]" title="Cấu hình NewsData.io API Key">
+            <i data-lucide="key" class="w-3 h-3 text-red-800"></i>
+            <span class="hidden sm:inline">NewsData API</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. HEADER MASTHEAD -->
+    <header class="border-b-2 border-stone-800 pt-6 pb-4 px-4 bg-transparent transition-colors">
+      <div class="max-w-7xl mx-auto">
+        <!-- Top row: Subtitle & Tools -->
+        <div className="border-b border-stone-300 pb-3" class="flex flex-col md:flex-row items-center justify-between pb-3 border-b border-stone-300 gap-3 text-xs text-stone-600 font-medium">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 bg-red-700 rounded-full animate-pulse"></span>
+            <span class="font-semibold text-stone-900 tracking-wider uppercase text-[11px]">
+              TRUYỀN THÔNG SỐ VIỆT NAM • KÊNH THÔNG TIN CHÍNH THỨC
+            </span>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <span class="italic">Xuất bản điện tử 24/7</span>
+            <span>•</span>
+            <span class="font-numbers">Số: 14.286</span>
+            <span>•</span>
+            <span class="text-red-700 font-bold uppercase tracking-wide">Ấn bản đặc biệt</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Audio Radio Briefing button -->
+            <button id="header-radio-btn" onclick="toggleRadioPodcast()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-200 text-stone-800 hover:bg-stone-300 transition-all shadow-xs" title="Nghe Bản tin Radio 60 Giây">
+              <i data-lucide="radio" class="w-3.5 h-3.5"></i>
+              <span>Radio 60s</span>
+            </button>
+
+            <!-- Bookmarks Drawer Button -->
+            <button onclick="openBookmarksModal()" class="relative flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-200 text-stone-800 hover:bg-stone-300 text-xs font-semibold transition-all shadow-xs" title="Mở tủ báo cá nhân">
+              <i data-lucide="bookmark" class="w-3.5 h-3.5 text-amber-600 fill-amber-600"></i>
+              <span>Tủ báo</span>
+              <span class="bookmark-count-badge hidden ml-1 px-1.5 py-0.2 bg-red-700 text-white rounded-full text-[10px] font-bold">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Central Masthead Newspaper Title -->
+        <div class="py-6 text-center relative">
+          <div class="flex items-center justify-center gap-3 mb-1">
+            <div class="hidden sm:block h-[1px] w-24 md:w-36 bg-gradient-to-r from-transparent to-stone-800"></div>
+            <span class="text-[11px] font-serif uppercase tracking-[0.25em] text-stone-700 font-semibold">
+              NHẬT BÁO ĐIỆN TỬ ĐA PHƯƠNG TIỆN
+            </span>
+            <div class="hidden sm:block h-[1px] w-24 md:w-36 bg-gradient-to-l from-transparent to-stone-800"></div>
+          </div>
+
+          <a href="#" onclick="selectCategory('all'); return false;" class="inline-block group">
+            <h1 class="font-headline text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-stone-950 hover:text-red-900 transition-colors py-1">
+              THỜI BÁO VIỆT
+            </h1>
+          </a>
+
+          <p class="mt-1 font-serif italic text-xs sm:text-sm text-stone-700 max-w-xl mx-auto">
+            "Tiếng nói của Độc Lập - Tri Thức - Thịnh Vượng & Hội Nhập Toàn Cầu"
+          </p>
+        </div>
+
+        <!-- Lower Toolbar: Search, Layout Switcher & Refresh -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-stone-300">
+          <!-- Search bar -->
+          <form id="search-form" class="w-full sm:w-80 md:w-96 relative">
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Tìm kiếm tin tức (nhấn '/' để tìm)..."
+              class="w-full pl-9 pr-8 py-1.5 text-xs rounded-full border border-stone-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-800 transition-all text-stone-900 placeholder:text-stone-400"
+            />
+            <i data-lucide="search" class="absolute left-3 top-2 text-stone-400 w-3.5 h-3.5"></i>
+          </form>
+
+          <!-- Action Tools -->
+          <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <!-- View Mode Switcher -->
+            <div class="flex items-center border border-stone-300 rounded-md overflow-hidden text-xs bg-stone-100">
+              <button onclick="applyViewMode('broadsheet')" data-view-btn="broadsheet" class="px-2.5 py-1 font-medium transition-colors" title="Bố cục Trang Báo Giấy Truyền Thống">
+                Trang Báo
+              </button>
+              <button onclick="applyViewMode('grid')" data-view-btn="grid" class="px-2.5 py-1 font-medium transition-colors" title="Bố cục Lưới Thẻ Hiện Đại">
+                Dạng Lưới
+              </button>
+              <button onclick="applyViewMode('compact')" data-view-btn="compact" class="px-2.5 py-1 font-medium transition-colors" title="Bố cục Danh Sách Thu Gọn">
+                Thu Gọn
+              </button>
+            </div>
+
+            <!-- Refresh Button -->
+            <button onclick="loadArticles(true)" class="flex items-center gap-1.5 px-3 py-1 bg-stone-900 hover:bg-red-800 text-white text-xs font-medium rounded-md transition-all shadow-xs" title="Làm mới dòng tin tức">
+              <i data-lucide="rotate-cw" class="w-3 h-3"></i>
+              <span class="hidden sm:inline">Cập nhật</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 3. BREAKING NEWS TICKER -->
+    <div class="bg-red-950 text-white border-y border-red-900 py-2 px-4 shadow-inner">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="flex items-center gap-1 bg-red-600 text-white font-black tracking-wider uppercase px-2.5 py-1 rounded text-[11px] shadow-sm animate-pulse">
+            <i data-lucide="flame" class="w-3.5 h-3.5 text-yellow-300"></i>
+            TIN NÓNG 24H
+          </span>
+          <span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
+        </div>
+
+        <!-- Headline container -->
+        <div id="breaking-headline-container" class="flex-1 overflow-hidden min-w-0 flex items-center">
+          <span class="text-stone-300 italic">Đang cập nhật tin nóng...</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-1.5 shrink-0 pl-2">
+          <span id="breaking-index-indicator" class="text-[11px] text-stone-300 font-numbers hidden md:inline">1/8</span>
+          <div class="flex items-center gap-0.5">
+            <button onclick="prevBreaking()" class="p-1 rounded hover:bg-red-800 text-stone-300 hover:text-white transition-colors" title="Tin trước">
+              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="nextBreaking()" class="p-1 rounded hover:bg-red-800 text-stone-300 hover:text-white transition-colors" title="Tin tiếp theo">
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CATEGORY NAVIGATION BAR -->
+    <nav class="border-b border-stone-300 bg-white/70 backdrop-blur-sm sticky top-0 z-30 shadow-xs transition-colors">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center overflow-x-auto no-scrollbar py-1 gap-1 sm:gap-2">
+          <button onclick="selectCategory('all')" data-cat-btn="all" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-bold text-red-900 bg-stone-100/90 rounded-sm relative shadow-xs">
+            Trang Chủ
+            <span class="cat-active-pill absolute bottom-0 left-2 right-2 h-0.5 bg-red-700 rounded-full"></span>
+          </button>
+          <button onclick="selectCategory('top')" data-cat-btn="top" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Thời Sự
+          </button>
+          <button onclick="selectCategory('crime')" data-cat-btn="crime" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Pháp Luật
+          </button>
+          <button onclick="selectCategory('business')" data-cat-btn="business" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Kinh Doanh
+          </button>
+          <button onclick="selectCategory('technology')" data-cat-btn="technology" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Công Nghệ & AI
+          </button>
+          <button onclick="selectCategory('sports')" data-cat-btn="sports" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Thể Thao
+          </button>
+          <button onclick="selectCategory('entertainment')" data-cat-btn="entertainment" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Giải Trí & Văn Hóa
+          </button>
+          <button onclick="selectCategory('health')" data-cat-btn="health" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Sức Khỏe & Y Tế
+          </button>
+          <button onclick="selectCategory('world')" data-cat-btn="world" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Thế Giới
+          </button>
+          <button onclick="selectCategory('science')" data-cat-btn="science" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Khoa Học
+          </button>
+          <button onclick="selectCategory('lifestyle')" data-cat-btn="lifestyle" class="whitespace-nowrap px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded-sm transition-colors">
+            Đời Sống & Du Lịch
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 5. FALLBACK / NOTICE BANNER -->
+    <div id="fallback-notice-banner" class="hidden bg-amber-100/90 border-b border-amber-300 text-amber-950 px-4 py-2 text-xs">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-amber-700 shrink-0"></i>
+          <span>
+            <strong>Lưu ý:</strong> Đang hiển thị bản tin tổng hợp dự phòng (do NewsData.io đạt giới hạn kết nối hoặc mạng bận).
+          </span>
+        </div>
+        <button onclick="openApiKeyModal()" class="underline font-semibold hover:text-red-900 shrink-0">
+          Cấu hình API Key
+        </button>
+      </div>
+    </div>
+
+    <!-- 6. MAIN BROADSHEET CONTENT -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-8">
+      <!-- A. Lead Hero Article Container -->
+      <section id="lead-hero-container"></section>
+
+      <!-- B. Secondary Triple Feature Bar -->
+      <section id="secondary-triple-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t-2 border-stone-800"></section>
+
+      <!-- C. Main 2-Column Split: Stream + Sidebar -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4 border-t border-stone-300">
+        <!-- Left Stream (8 cols) -->
+        <div class="lg:col-span-8 space-y-6">
+          <div class="flex items-center justify-between pb-2 border-b-2 border-stone-900">
+            <h3 class="font-headline text-lg sm:text-xl font-bold uppercase tracking-tight text-stone-900 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 bg-red-800 rounded-full"></span>
+              <span id="stream-section-title">DÒNG SỰ KIỆN NỔI BẬT & THỜI SỰ 24H</span>
+            </h3>
+            <span class="text-xs text-stone-500 font-medium">Cập nhật liên tục</span>
+          </div>
+
+          <!-- Dynamic Articles Stream -->
+          <div id="main-articles-stream"></div>
+
+          <!-- Pagination Button -->
+          <div id="pagination-container" class="text-center pt-6 hidden"></div>
+        </div>
+
+        <!-- Right Sidebar (4 cols) -->
+        <div class="lg:col-span-4 space-y-6">
+          <!-- 1. Most Read Trending Widget -->
+          <div class="border border-stone-300 bg-white/60 p-4 rounded-xs shadow-xs">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b-2 border-stone-800">
+              <div class="flex items-center gap-1.5 font-bold uppercase tracking-wider text-xs text-stone-900">
+                <i data-lucide="flame" class="w-4 h-4 text-red-700"></i>
+                <span>ĐỌC NHIỀU NHẤT</span>
+              </div>
+              <span class="text-[10px] text-stone-500 font-numbers">24H QUA</span>
+            </div>
+            <div id="trending-articles-list" class="divide-y divide-stone-200"></div>
+          </div>
+
+          <!-- 2. Audio Podcast Card -->
+          <div class="border border-red-200 bg-gradient-to-br from-red-900 to-stone-900 text-white p-4 rounded-xs shadow-md">
+            <div class="flex items-center justify-between mb-2">
+              <span class="bg-red-700 text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded">
+                RADIO 24H
+              </span>
+              <span class="text-[11px] text-red-200 font-numbers">BẢN TIN ÂM THANH</span>
+            </div>
+            <h4 class="font-headline text-base font-bold text-white mb-2 leading-tight">
+              Nghe Bản Tin Thời Sự Tổng Hợp Trong 60 Giây
+            </h4>
+            <p class="text-xs text-stone-300 leading-relaxed mb-4">
+              Hệ thống trí tuệ nhân tạo tự động tóm tắt và đọc các điểm tin thời sự nổi bật nhất ngày hôm nay bằng giọng nói tiếng Việt.
+            </p>
+            <button onclick="toggleRadioPodcast()" class="w-full py-2 px-3 rounded text-xs font-bold flex items-center justify-center gap-2 bg-white hover:bg-stone-100 text-stone-900 shadow-sm transition-all">
+              <i data-lucide="radio" class="w-4 h-4"></i>
+              <span>Phát Ngay Bản Tin Này</span>
+            </button>
+          </div>
+
+          <!-- 3. Market Rates Card -->
+          <div class="border border-stone-300 bg-white/60 p-4 rounded-xs shadow-xs">
+            <div class="flex items-center justify-between pb-2 mb-3 border-b border-stone-300">
+              <span class="font-bold text-xs uppercase tracking-wider text-stone-900">
+                THỊ TRƯỜNG & TỶ GIÁ
+              </span>
+              <span class="text-[10px] text-stone-500">Trực tuyến</span>
+            </div>
+            <div id="sidebar-market-table" class="space-y-2.5 text-xs"></div>
+          </div>
+
+          <!-- 4. Editorial Opinion / Góc Nhìn -->
+          <div class="border border-stone-300 bg-amber-50/50 p-4 rounded-xs shadow-xs">
+            <div class="flex items-center gap-1.5 pb-2 mb-3 border-b border-amber-200">
+              <i data-lucide="quote" class="w-4 h-4 text-amber-800"></i>
+              <span class="font-bold text-xs uppercase tracking-wider text-amber-950">
+                GÓC NHÌN & BÌNH LUẬN
+              </span>
+            </div>
+            <div class="font-editorial text-xs text-stone-800 italic leading-relaxed">
+              "Đổi mới sáng tạo không chỉ là câu chuyện công nghệ, mà là sự chuyển biến trong tư duy phát triển bền vững của toàn xã hội."
+            </div>
+            <div class="mt-2 text-right text-[11px] font-semibold text-stone-700">
+              — Ban Biên Tập Thời Báo
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 7. ARTICLE READER MODAL -->
+    <div id="article-reader-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-950/70 backdrop-blur-xs flex justify-center p-2 sm:p-4 md:p-6 animate-fade-in" onclick="closeArticleModal()">
+      <div id="article-modal-content" class="bg-white text-stone-900 w-full max-w-4xl rounded-xs shadow-2xl overflow-hidden my-auto border border-stone-300 flex flex-col max-h-[92vh]" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <!-- 8. BOOKMARKS DRAWER MODAL -->
+    <div id="bookmarks-drawer-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-950/70 backdrop-blur-xs flex justify-center p-4 animate-fade-in" onclick="closeBookmarksModal()">
+      <div class="bg-white text-stone-900 w-full max-w-2xl rounded-xs shadow-2xl border border-stone-300 my-auto overflow-hidden flex flex-col max-h-[85vh]" onclick="event.stopPropagation()">
+        <div class="border-b border-stone-200 px-5 py-3.5 bg-stone-50 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="bookmark" class="text-amber-600 fill-amber-600 w-4 h-4"></i>
+            <h3 class="font-headline font-bold text-base text-stone-900">Tủ Báo Cá Nhân</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearAllBookmarks()" class="text-xs text-rose-700 hover:text-rose-900 flex items-center gap-1 px-2 py-1 rounded hover:bg-rose-50 transition-colors">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Xóa hết</span>
+            </button>
+            <button onclick="closeBookmarksModal()" class="p-1 rounded text-stone-500 hover:text-stone-800 hover:bg-stone-200 transition-colors">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div id="bookmarks-list-container" class="overflow-y-auto p-4 divide-y divide-stone-200 flex-1"></div>
+      </div>
+    </div>
+
+    <!-- 9. API KEY CONFIG MODAL -->
+    <div id="api-key-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-950/70 backdrop-blur-xs flex justify-center p-4 animate-fade-in" onclick="closeApiKeyModal()">
+      <div class="bg-white text-stone-900 w-full max-w-lg rounded-xs shadow-2xl border border-stone-300 my-auto overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+        <div class="border-b border-stone-200 px-5 py-3.5 bg-stone-50 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="key" class="text-red-800 w-4 h-4"></i>
+            <h3 class="font-headline font-bold text-base text-stone-900">Cấu hình NewsData.io API Key</h3>
+          </div>
+          <button onclick="closeApiKeyModal()" class="p-1 rounded text-stone-500 hover:text-stone-800 hover:bg-stone-200 transition-colors">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-4 text-xs text-stone-700">
+          <p>Thời Báo Việt truy xuất tin tức từ cổng dữ liệu <strong>NewsData.io</strong> (ngôn ngữ tiếng Việt <code class="bg-stone-100 px-1 py-0.5 rounded text-red-700">language=vi</code>).</p>
+          <div>
+            <label class="block font-bold text-stone-900 mb-1">API Key (Khóa kết nối):</label>
+            <input id="api-key-input" type="text" class="w-full px-3 py-2 border border-stone-300 rounded font-mono text-xs focus:outline-none focus:ring-2 focus:ring-red-800 bg-stone-50 text-stone-900" />
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <button onclick="resetDefaultApiKey()" class="text-stone-600 hover:text-stone-900 underline text-[11px]">
+              Khôi phục API Key ban đầu
+            </button>
+            <button id="test-key-btn" onclick="testApiKey()" class="px-3 py-1 bg-stone-200 hover:bg-stone-300 text-stone-800 rounded font-semibold transition-colors">
+              Kiểm tra kết nối
+            </button>
+          </div>
+          <div id="api-test-result" class="hidden"></div>
+          <div class="bg-stone-50 p-3 rounded border border-stone-200 space-y-1 text-stone-600 text-[11px]">
+            <div class="font-semibold text-stone-800">Thông tin gói API miễn phí:</div>
+            <div>• NewsData.io cung cấp 200 lượt gọi / ngày đối với gói cơ bản.</div>
+            <div>• Hệ thống tự động lưu bộ nhớ đệm (Cache 10 phút) để tối ưu và tiết kiệm dung lượng.</div>
+          </div>
+        </div>
+        <div class="border-t border-stone-200 px-5 py-3 bg-stone-50 flex items-center justify-end gap-2">
+          <button onclick="closeApiKeyModal()" class="px-3 py-1.5 rounded text-xs font-semibold text-stone-600 hover:bg-stone-200 transition-colors">Hủy</button>
+          <button onclick="saveApiKey()" class="px-4 py-1.5 bg-red-800 hover:bg-red-900 text-white rounded text-xs font-bold transition-colors shadow-xs">Lưu và Áp dụng</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. FLOATING RADIO PLAYER -->
+    <div id="floating-radio-player" class="hidden fixed bottom-4 right-4 z-40 bg-stone-900 text-white p-3.5 rounded-lg shadow-2xl border border-stone-700 flex items-center gap-4 max-w-md">
+      <div class="w-10 h-10 rounded-full bg-red-700 flex items-center justify-center shrink-0 animate-pulse">
+        <i data-lucide="radio" class="w-5 h-5 text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-amber-400 uppercase tracking-wide text-[10px]">ĐANG PHÁT AUDIO</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        </div>
+        <div class="font-headline font-bold text-sm text-stone-100 truncate">Bản Tin Điểm Nhanh Thời Sự 60s</div>
+        <div class="text-stone-400 text-[11px] truncate">Giọng đọc tự động AI • Tổng hợp 3 tin nóng nhất</div>
+      </div>
+      <button onclick="window.audioRadioService.stop()" class="p-1.5 text-stone-400 hover:text-white rounded transition-colors" title="Dừng phát">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- 11. FOOTER -->
+    <footer class="border-t-4 border-stone-900 bg-stone-900 text-stone-300 pt-12 pb-8 px-4 mt-16 transition-colors">
+      <div class="max-w-7xl mx-auto space-y-10">
+        <!-- Newsletter Box -->
+        <div class="bg-stone-800 border border-stone-700 p-6 rounded-xs flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="space-y-1 text-center md:text-left">
+            <h4 class="font-headline text-lg sm:text-xl font-bold text-white flex items-center justify-center md:justify-start gap-2">
+              <i data-lucide="mail" class="w-5 h-5 text-amber-500"></i>
+              Đăng Ký Nhận Điểm Tin Buổi Sáng & Buổi Tối
+            </h4>
+            <p class="text-xs text-stone-400">
+              Tổng hợp 5 bài báo thời sự & kinh tế quan trọng nhất của Việt Nam gửi thẳng tới hộp thư của bạn mỗi ngày.
+            </p>
+          </div>
+          <form id="newsletter-form" class="flex items-center gap-2 w-full md:w-auto">
+            <input type="email" placeholder="Nhập địa chỉ email của bạn..." required class="px-3.5 py-2 text-xs rounded bg-stone-900 border border-stone-600 text-white placeholder:text-stone-500 focus:outline-none focus:border-amber-500 w-full md:w-64" />
+            <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs rounded transition-colors whitespace-nowrap shadow-sm">
+              Đăng ký
+            </button>
+          </form>
+        </div>
+
+        <!-- Directory Columns -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs border-b border-stone-800 pb-10">
+          <div class="md:col-span-5 space-y-4">
+            <span class="font-headline text-2xl font-black tracking-tight text-white">THỜI BÁO VIỆT</span>
+            <p class="text-stone-400 font-editorial leading-relaxed text-xs">
+              Nhật báo điện tử đa phương tiện, cập nhật liên tục 24/7 thông tin thời sự, chính trị, kinh tế, tài chính, công nghệ và đời sống văn hóa Việt Nam và quốc tế.
+            </p>
+            <div class="space-y-1.5 text-stone-400 text-[11px]">
+              <div>Trụ sở chính: Tòa nhà Báo Chí Quốc Gia, Ba Đình, TP. Hà Nội</div>
+              <div>Đường dây nóng: (024) 38.256.xxx • Hotline: 0988.xxx.xxx</div>
+              <div>Tòa soạn & Bạn đọc: toasoan@thoibaoviet.vn</div>
+            </div>
+          </div>
+
+          <div class="md:col-span-4 space-y-3">
+            <div class="font-bold uppercase tracking-wider text-white text-xs border-b border-stone-800 pb-2">
+              CHUYÊN MỤC CHÍNH
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <button onclick="selectCategory('all'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Trang Chủ</button>
+              <button onclick="selectCategory('top'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Thời Sự</button>
+              <button onclick="selectCategory('crime'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Pháp Luật</button>
+              <button onclick="selectCategory('business'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Kinh Doanh</button>
+              <button onclick="selectCategory('technology'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Công Nghệ AI</button>
+              <button onclick="selectCategory('sports'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Thể Thao</button>
+              <button onclick="selectCategory('entertainment'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Giải Trí</button>
+              <button onclick="selectCategory('health'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Sức Khỏe</button>
+              <button onclick="selectCategory('world'); window.scrollTo({top:0, behavior:'smooth'})" class="text-left text-stone-400 hover:text-amber-400 transition-colors py-0.5">Thế Giới</button>
+            </div>
+          </div>
+
+          <div class="md:col-span-3 space-y-3 text-[11px] text-stone-400">
+            <div class="font-bold uppercase tracking-wider text-white text-xs border-b border-stone-800 pb-2">
+              BAN BIÊN TẬP
+            </div>
+            <div><strong>Tổng Biên tập:</strong> Nhà báo Nguyễn Văn Thành</div>
+            <div><strong>Phó Tổng Biên tập:</strong> Trần Mai Hương, Lê Quốc Dũng</div>
+            <div><strong>Giấy phép xuất bản báo chí số:</strong> 188/GP-BTTTT</div>
+            <div class="pt-2 text-stone-500 text-[10px]">
+              Dữ liệu tin tức được cung cấp và tổng hợp tự động từ cổng thông tin NewsData.io API (Tiếng Việt).
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-500">
+          <div>© 2026 THỜI BÁO VIỆT (Vietnam Times Digital). Bảo lưu mọi quyền theo luật báo chí.</div>
+          <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors">
+            <span>Về đầu trang</span>
+            <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts in order -->
+    <script src="js/data.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

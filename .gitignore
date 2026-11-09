@@ -1,0 +1,16 @@
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+node_modules/
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS generated files
+.DS_Store
+Thumbs.db
